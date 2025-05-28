@@ -181,8 +181,8 @@ Type:
   tasks:
     - name: Copy JAR file
       copy:
-        src: /mnt/c/Users/YourName/.jenkins/workspace/demoCI/target/demo-1.0-SNAPSHOT.jar
-        dest: /mnt/c/Users/YourName/deployed/demo-1.0-SNAPSHOT.jar
+        src: /mnt/c/Users/venkt/.jenkins/workspace/demoCI/target/demo-1.0-SNAPSHOT.jar
+        dest: /home/venkt/deployed/demo-1.0-SNAPSHOT.jar
 ```
 
 ✅ Replace `YourName` with your actual Windows username.
