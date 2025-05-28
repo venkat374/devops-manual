@@ -1,79 +1,110 @@
-Alright — no worries at all. I’ll break this down super simply for you like I’d explain it to a friend before a lab test. Let’s simulate a Java program and walk through **Maven**, **Jenkins**, and **Ansible** for it.
+---
+
+## 📌 Big Picture: What are we doing in the lab test?
+
+👉 You’ll get a Java program
+👉 You’ll turn it into a **Maven project**
+👉 You’ll build it through **Jenkins** (Continuous Integration)
+👉 You’ll use **Ansible** on **Ubuntu (inside WSL if you’re on Windows)** to move the output `.jar` file to a deploy folder
 
 ---
 
-## 📌 What’s happening here, in plain English:
-
-* **You’ll get a Java program.**
-* You have to wrap it inside a Maven or Gradle project.
-* Build it using Jenkins (CI tool).
-* Deploy the built `.jar` file somewhere using Ansible.
+# 📒 COMPLETE STEP-BY-STEP (Based on your lab manual)
 
 ---
 
-## 📌 Simulated Example Program: HelloWorld.java
-
-**HelloWorld.java**
-
-```java
-public class HelloWorld {
-    public static void main(String[] args) {
-        System.out.println("Hello, Lab Test!");
-    }
-}
-```
+## 🔶 PART A: Java Project in Maven, Git, Jenkins CI
 
 ---
 
-## 📌 Step-by-Step Lab Test Simulation
+### ✅ Step 1: Create a Maven project
 
-### ✅ 1️⃣ Create Maven Project
-
-**Command**
+**In Windows Command Prompt / Terminal:**
 
 ```bash
 mvn archetype:generate -DgroupId=com.example -DartifactId=demo -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
 ```
 
-Then:
+✅ Go into the project:
 
 ```bash
-cd demo/src/main/java/com/example
-```
-
-**Replace App.java with your given HelloWorld.java.**
-(Or replace code inside it.)
-
----
-
-### ✅ 2️⃣ Build Maven Project
-
-Go to project root:
-
-```bash
-cd /path/to/demo
-```
-
-Then build it:
-
-```bash
-mvn clean install
-```
-
-Your `.jar` file will be in:
-
-```
-target/demo-1.0-SNAPSHOT.jar
+cd demo
 ```
 
 ---
 
-### ✅ 3️⃣ Jenkins Job Setup
+### ✅ Step 2: Replace Java file
 
-* Open Jenkins: `http://localhost:8080`
-* New Item → *demoCI* (Pipeline)
-* Scroll to Pipeline section
-* Paste this pipeline code:
+Go to:
+
+```
+src/main/java/com/example/App.java
+```
+
+📝 Replace the code inside `App.java` with the Java program your teacher gives you during the test.
+**OR**
+Rename it to `HelloWorld.java` and add your program there if needed.
+
+---
+
+### ✅ Step 3: Initialize Git repository
+
+**In Command Prompt:**
+
+```bash
+git init
+git add .
+git commit -m "Initial commit"
+```
+
+Then, create a **new repository on your GitHub account** called something like `program8` or `demo-project`.
+
+Copy the repo URL.
+
+Now, link your local project to GitHub:
+
+```bash
+git remote add origin https://github.com/YourUsername/demo-project.git
+git branch -M main
+git push -u origin main
+```
+
+✅ Now your project is on GitHub.
+
+---
+
+### ✅ Step 4: Run Jenkins
+
+**In Command Prompt (Admin Mode)**
+Go to where your `jenkins.war` is.
+
+Example:
+
+```bash
+java -jar C:\Users\YourName\Downloads\jenkins.war
+```
+
+Then in your browser:
+
+```
+http://localhost:8080
+```
+
+Login using your username/password.
+
+---
+
+### ✅ Step 5: Create a Jenkins Job
+
+* Click **New Item**
+* Name: `demoCI`
+* Type: **Pipeline**
+* OK
+
+Scroll down to **Pipeline Section**
+
+* **Definition**: Pipeline Script
+* Copy-paste this:
 
 ```groovy
 pipeline {
@@ -84,7 +115,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: '<your-repo-url>'
+                git branch: 'main', url: 'https://github.com/YourUsername/demo-project.git'
             }
         }
         stage('Build') {
@@ -92,7 +123,7 @@ pipeline {
                 bat 'mvn clean install'
             }
         }
-        stage('Archive Artifact') {
+        stage('Archive Artifacts') {
             steps {
                 archiveArtifacts artifacts: 'target/*.jar', allowEmptyArchive: true
             }
@@ -101,21 +132,48 @@ pipeline {
 }
 ```
 
-* Replace `<your-repo-url>` with your repo link.
-* Save → Build Now.
+✅ Save
+✅ Click **Build Now**
+✅ Check **Console Output** — should say `SUCCESS`
 
 ---
 
-### ✅ 4️⃣ Deploy with Ansible
+## 🔶 PART B: Use Ansible on Ubuntu to Deploy
 
-**Create hosts.ini**
+---
+
+**⚠️ If you’re on Windows, open your WSL Ubuntu terminal**
+
+---
+
+### ✅ Step 6: Create Ansible hosts.ini
+
+In Ubuntu terminal:
+
+```bash
+vi hosts.ini
+```
+
+Type:
 
 ```
 [local]
 localhost ansible_connection=local
 ```
 
-**Create deploy.yml**
+Save with `Esc` → `:wq`
+
+---
+
+### ✅ Step 7: Create Ansible Playbook deploy.yml
+
+In Ubuntu terminal:
+
+```bash
+vi deploy.yml
+```
+
+Type:
 
 ```yaml
 - name: Deploy artifact locally
@@ -127,32 +185,60 @@ localhost ansible_connection=local
         dest: /mnt/c/Users/YourName/deployed/demo-1.0-SNAPSHOT.jar
 ```
 
-**Run it**
+✅ Replace `YourName` with your actual Windows username.
+
+Save with `Esc` → `:wq`
+
+---
+
+### ✅ Step 8: Run Ansible Playbook
+
+In Ubuntu:
 
 ```bash
 ansible-playbook -i hosts.ini deploy.yml
 ```
 
-**Check**
+---
+
+### ✅ Step 9: Check if it worked
+
+In Ubuntu:
 
 ```bash
 ls /mnt/c/Users/YourName/deployed
 ```
 
-You should see the `.jar` file there.
+✅ You should see:
+
+```
+demo-1.0-SNAPSHOT.jar
+```
 
 ---
 
-## 📌 Done 🎉
+## 📌 Done ✅
 
-That’s literally it.
-**If your teacher gives a different program — just replace the code inside `HelloWorld.java` (or `App.java`) with whatever she gives.**
-The rest stays the same.
+**If teacher asks for demo, you can explain:**
+
+* Maven compiles Java and builds a `.jar`
+* Jenkins automates the build process from GitHub
+* Ansible copies that `.jar` to a deploy folder (like a simple deployment)
 
 ---
 
-## 📌 Pro Tip:
+## 📌 Extra Notes:
 
-* Create one Maven project in advance, keep replacing the Java code when asked.
-* Use the same Jenkins job — just update repo URL or pull latest code if needed.
-* Ansible playbook remains same.
+* `/mnt/c/` is how Ubuntu accesses your Windows drives.
+* `vi` is a text editor in Ubuntu.
+
+  * `i` to insert text
+  * `Esc` → `:wq` to save and exit
+* If Ansible isn’t installed:
+
+```bash
+sudo apt update
+sudo apt install ansible
+```
+
+---
